@@ -1,7 +1,7 @@
 const { authenticateToken } = require("../_tool/authentificator.js");
 
 module.exports = app => {
-    const user = require("../controllers/rank.controller.js");
+    const user = require("../controllers/task.controller.js");
   
     var secured = require("express").Router();
   
@@ -12,5 +12,5 @@ module.exports = app => {
     secured.delete("/:id", user.delete);
     secured.delete("/", user.deleteAll);
   
-    app.use('/api/rank', authenticateToken, secured);
+    app.use('/api/task', authenticateToken, secured);
   };

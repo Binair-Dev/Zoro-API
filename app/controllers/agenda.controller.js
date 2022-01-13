@@ -1,6 +1,6 @@
 require('dotenv').config()
 const db = require("../models");
-const Rank = db.rank;
+const Agenda = db.agenda;
 
 //#region CREATE
 exports.create = async (req, res) => {
@@ -13,38 +13,37 @@ exports.create = async (req, res) => {
       return;
     }
   
-    if(req.body.Name !== undefined && req.body.RankId !== undefined) {
-
-      const dbRank = await Rank.findOne({Name: req.body.Name})
+    if(req.body.TaskId !== null) {
+      const dbAgenda = await Agenda.findOne({Name: req.body.TaskId})
       .then(data => {
-        tempRank = new Rank({
+        tempAgenda = new Agenda({
           _id:  data._id,
-          Name: data.Name,
-          RankId: data.RankId,
+          startDate: data.startDate,
+          endDate: data.endDate,
         });
-        return tempRank;
+        return tempAgenda;
       }).catch(err => {
         return null;
       })
       
-      const rank = new Rank({
-        Name: req.body.Name,
-        RankId: req.body.RankId,
+      const agenda = new Agenda({
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
       });
 
-      if(dbRank === null) {
-        rank
-        .save(rank)
+      if(dbAgenda === null) {
+        agenda
+        .save(agenda)
         .then(data => {
           res.send(data);
         })
         .catch(err => {
           res.status(500).send({
             message:
-              err.message || "Erreur lors de la création du rang."
+              err.message || "Erreur lors de la création de l'agenda."
           });
         });
-      } else res.status(500).send({message: "Un rang avec cet id est déjà existant !"});
+      } else res.status(500).send({message: "Un agenda avec cet id est déjà existant !"});
     } else {
       res.status(400).send({message: "Aucun contenu reçu."});
     }
@@ -58,12 +57,12 @@ exports.create = async (req, res) => {
       return;
     }
 
-    Rank.find()
+    Agenda.find()
       .then(data => {
         res.send(data);
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur lors de la récupération de du rang."});
+        res.status(500).send({message: "Erreur lors de la récupération de de l'agenda."});
       });
   };
 
@@ -74,16 +73,16 @@ exports.create = async (req, res) => {
     }
     const id = req.params.id;
   
-    Rank.findOne({Email: id})
+    Agenda.findOne({_id: id})
       .then(data => {
         if (!data)
-          res.status(404).send({message: "Impossible de trouver le rang avec l'id suivant: " + id });
+          res.status(404).send({message: "Impossible de trouver l'agenda avec l'id suivant: " + id });
         else res.send(data);
       })
       .catch(err => {
         res
           .status(500)
-          .send({ message: "Erreur pendant la récuperation du rang avec l'id suivant: " + id });
+          .send({ message: "Erreur pendant la récuperation de l'agenda avec l'id suivant: " + id });
       });
   };
 //#endregion READ
@@ -100,24 +99,25 @@ exports.update = (req, res) => {
   
     const id = req.params.id;
 
-    Rank.find({RankId: id})
+    Agenda.find({_id: id})
       .then(data => {
         if(data.length > 0) {
           data.forEach(element => {
             if (!element) {
-              res.status(404).send({message: "Impossible de mettre a jour le rang avec l'id: " + id + "!"});
+              res.status(404).send({message: "Impossible de mettre a jour l'agenda avec l'id: " + id + "!"});
             } else{
               element.updateOne({
-                Name: req.body.Name, 
+                startDate: req.body.startDate, 
+                endDate: req.body.endDate, 
               }).then(data => {
                 res.status(200).send(data)
               });
             }});
-        } else res.status(404).send({message: "Impossible de trouver le rang !"})
+        } else res.status(404).send({message: "Impossible de trouver l'agenda !"})
       })
       .catch(err => {
         res.status(500).send({
-          message: "Erreur lors de la mise a jour du rang avec l'id: " + id
+          message: "Erreur lors de la mise a jour de l'agenda avec l'id: " + id
         });
       });
   };
@@ -130,17 +130,17 @@ exports.delete = (req, res) => {
     return;
   }
     const id = req.params.id;
-
-    Rank.findByIdAndRemove(id)
+    
+    Agenda.findByIdAndRemove(id)
       .then(data => {
         if (!data) {
-          res.status(404).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+          res.status(404).send({message: `Impossible de supprimer l'agenda avec l'ID: ${id}.`});
         } else {
-          res.send({message: "Rang supprimé avec succès!"});
+          res.send({message: "Agenda supprimé avec succès!"});
         }
       })
       .catch(err => {
-        res.status(500).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+        res.status(500).send({message: `Impossible de supprimer l'agenda avec l'ID: ${id}.`});
       });
   };
 
@@ -149,12 +149,12 @@ exports.deleteAll = (req, res) => {
     res.status(401).send({message: "Non authorisé"})
     return;
   }
-  Rank.deleteMany({})
+  Agenda.deleteMany({})
       .then(data => {
-        res.send({message: `${data.deletedCount} rang ont été supprimés!`});
+        res.send({message: `${data.deletedCount} agendas ont été supprimés!`});
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur durant la suppression des rangs."});
+        res.status(500).send({message: "Erreur durant la suppression des agendas."});
       });
   };
 //#endregion DELETE

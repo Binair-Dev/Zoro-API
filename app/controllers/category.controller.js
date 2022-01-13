@@ -1,6 +1,6 @@
 require('dotenv').config()
 const db = require("../models");
-const Rank = db.rank;
+const Category = db.category;
 
 //#region CREATE
 exports.create = async (req, res) => {
@@ -13,38 +13,38 @@ exports.create = async (req, res) => {
       return;
     }
   
-    if(req.body.Name !== undefined && req.body.RankId !== undefined) {
+    if(req.body.Name !== undefined && req.body.CategoryId !== undefined) {
 
-      const dbRank = await Rank.findOne({Name: req.body.Name})
+      const dbCategory = await Category.findOne({Name: req.body.Name})
       .then(data => {
-        tempRank = new Rank({
+        tempCategory = new Category({
           _id:  data._id,
           Name: data.Name,
-          RankId: data.RankId,
+          CategoryId: data.CategoryId,
         });
-        return tempRank;
+        return tempCategory;
       }).catch(err => {
         return null;
       })
       
-      const rank = new Rank({
+      const category = new Category({
         Name: req.body.Name,
-        RankId: req.body.RankId,
+        CategoryId: req.body.CategoryId,
       });
 
-      if(dbRank === null) {
-        rank
-        .save(rank)
+      if(dbCategory === null) {
+        category
+        .save(category)
         .then(data => {
           res.send(data);
         })
         .catch(err => {
           res.status(500).send({
             message:
-              err.message || "Erreur lors de la création du rang."
+              err.message || "Erreur lors de la création de la catégorie."
           });
         });
-      } else res.status(500).send({message: "Un rang avec cet id est déjà existant !"});
+      } else res.status(500).send({message: "Une catégorie avec cet id est déjà existant !"});
     } else {
       res.status(400).send({message: "Aucun contenu reçu."});
     }
@@ -58,12 +58,12 @@ exports.create = async (req, res) => {
       return;
     }
 
-    Rank.find()
+    Category.find()
       .then(data => {
         res.send(data);
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur lors de la récupération de du rang."});
+        res.status(500).send({message: "Erreur lors de la récupération de de la catégorie."});
       });
   };
 
@@ -74,16 +74,16 @@ exports.create = async (req, res) => {
     }
     const id = req.params.id;
   
-    Rank.findOne({Email: id})
+    Category.findOne({Email: id})
       .then(data => {
         if (!data)
-          res.status(404).send({message: "Impossible de trouver le rang avec l'id suivant: " + id });
+          res.status(404).send({message: "Impossible de trouver la catégorie avec l'id suivant: " + id });
         else res.send(data);
       })
       .catch(err => {
         res
           .status(500)
-          .send({ message: "Erreur pendant la récuperation du rang avec l'id suivant: " + id });
+          .send({ message: "Erreur pendant la récuperation de la catégorie avec l'id suivant: " + id });
       });
   };
 //#endregion READ
@@ -100,12 +100,12 @@ exports.update = (req, res) => {
   
     const id = req.params.id;
 
-    Rank.find({RankId: id})
+    Category.find({CategoryId: id})
       .then(data => {
         if(data.length > 0) {
           data.forEach(element => {
             if (!element) {
-              res.status(404).send({message: "Impossible de mettre a jour le rang avec l'id: " + id + "!"});
+              res.status(404).send({message: "Impossible de mettre a jour la catégorie avec l'id: " + id + "!"});
             } else{
               element.updateOne({
                 Name: req.body.Name, 
@@ -113,11 +113,12 @@ exports.update = (req, res) => {
                 res.status(200).send(data)
               });
             }});
-        } else res.status(404).send({message: "Impossible de trouver le rang !"})
+        } else res.status(404).send({message: "Impossible de trouver la catégorie !"})
+        
       })
       .catch(err => {
         res.status(500).send({
-          message: "Erreur lors de la mise a jour du rang avec l'id: " + id
+          message: "Erreur lors de la mise a jour de la catégorie avec l'id: " + id
         });
       });
   };
@@ -131,16 +132,16 @@ exports.delete = (req, res) => {
   }
     const id = req.params.id;
 
-    Rank.findByIdAndRemove(id)
+    Category.findByIdAndRemove(id)
       .then(data => {
         if (!data) {
-          res.status(404).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+          res.status(404).send({message: `Impossible de supprimer la catégorie avec l'ID: ${id}.`});
         } else {
-          res.send({message: "Rang supprimé avec succès!"});
+          res.send({message: "Catégorie supprimé avec succès!"});
         }
       })
       .catch(err => {
-        res.status(500).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+        res.status(500).send({message: `Impossible de supprimer la catégorie avec l'ID: ${id}.`});
       });
   };
 
@@ -149,12 +150,12 @@ exports.deleteAll = (req, res) => {
     res.status(401).send({message: "Non authorisé"})
     return;
   }
-  Rank.deleteMany({})
+  Category.deleteMany({})
       .then(data => {
-        res.send({message: `${data.deletedCount} rang ont été supprimés!`});
+        res.send({message: `${data.deletedCount} catégorie ont été supprimés!`});
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur durant la suppression des rangs."});
+        res.status(500).send({message: "Erreur durant la suppression des catégorie."});
       });
   };
 //#endregion DELETE

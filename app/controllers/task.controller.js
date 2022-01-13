@@ -1,6 +1,6 @@
 require('dotenv').config()
 const db = require("../models");
-const Rank = db.rank;
+const Task = db.task;
 
 //#region CREATE
 exports.create = async (req, res) => {
@@ -13,38 +13,50 @@ exports.create = async (req, res) => {
       return;
     }
   
-    if(req.body.Name !== undefined && req.body.RankId !== undefined) {
+    if(req.body.Name !== undefined) {
 
-      const dbRank = await Rank.findOne({Name: req.body.Name})
+      const dbTask = await Task.findOne({
+        CategoryId: req.body.CategoryId,
+        Name: req.body.Name,
+        Description: req.body.Description,
+        AgendaId: req.body.AgendaId,
+        UserId: req.body.UserId,
+      })
       .then(data => {
-        tempRank = new Rank({
+        tempRank = new Task({
           _id:  data._id,
+          CategoryId: data.CategoryId,
           Name: data.Name,
-          RankId: data.RankId,
+          Description: data.Description,
+          AgendaId: data.AgendaId,
+          UserId: data.UserId,
         });
         return tempRank;
       }).catch(err => {
         return null;
       })
       
-      const rank = new Rank({
+      const task = new Task({
+        CategoryId: req.body.CategoryId,
         Name: req.body.Name,
-        RankId: req.body.RankId,
+        Description: req.body.Description,
+        AgendaId: req.body.AgendaId,
+        UserId: req.body.UserId,
       });
 
-      if(dbRank === null) {
-        rank
-        .save(rank)
+      if(dbTask === null) {
+        task
+        .save(task)
         .then(data => {
           res.send(data);
         })
         .catch(err => {
           res.status(500).send({
             message:
-              err.message || "Erreur lors de la création du rang."
+              err.message || "Erreur lors de la création de la tache."
           });
         });
-      } else res.status(500).send({message: "Un rang avec cet id est déjà existant !"});
+      } else res.status(500).send({message: "Une tache avec cet id est déjà existant !"});
     } else {
       res.status(400).send({message: "Aucun contenu reçu."});
     }
@@ -58,12 +70,12 @@ exports.create = async (req, res) => {
       return;
     }
 
-    Rank.find()
+    Task.find()
       .then(data => {
         res.send(data);
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur lors de la récupération de du rang."});
+        res.status(500).send({message: "Erreur lors de la récupération de la tache."});
       });
   };
 
@@ -74,16 +86,16 @@ exports.create = async (req, res) => {
     }
     const id = req.params.id;
   
-    Rank.findOne({Email: id})
+    Task.findOne({_id: id})
       .then(data => {
         if (!data)
-          res.status(404).send({message: "Impossible de trouver le rang avec l'id suivant: " + id });
+          res.status(404).send({message: "Impossible de trouver la tache avec l'id suivant: " + id });
         else res.send(data);
       })
       .catch(err => {
         res
           .status(500)
-          .send({ message: "Erreur pendant la récuperation du rang avec l'id suivant: " + id });
+          .send({ message: "Erreur pendant la récuperation de la tache avec l'id suivant: " + id });
       });
   };
 //#endregion READ
@@ -100,24 +112,28 @@ exports.update = (req, res) => {
   
     const id = req.params.id;
 
-    Rank.find({RankId: id})
+    Task.find({_id: id})
       .then(data => {
         if(data.length > 0) {
           data.forEach(element => {
             if (!element) {
-              res.status(404).send({message: "Impossible de mettre a jour le rang avec l'id: " + id + "!"});
+              res.status(404).send({message: "Impossible de mettre a jour la tache avec l'id: " + id + "!"});
             } else{
               element.updateOne({
+                CategoryId: req.body.CategoryId, 
                 Name: req.body.Name, 
+                Description: req.body.Description, 
+                AgendaId: req.body.AgendaId, 
+                UserId: req.body.UserId, 
               }).then(data => {
                 res.status(200).send(data)
               });
             }});
-        } else res.status(404).send({message: "Impossible de trouver le rang !"})
+        } else res.status(404).send({message: "Impossible de trouver la tache !"})
       })
       .catch(err => {
         res.status(500).send({
-          message: "Erreur lors de la mise a jour du rang avec l'id: " + id
+          message: "Erreur lors de la mise a jour de la tache avec l'id: " + id
         });
       });
   };
@@ -131,16 +147,16 @@ exports.delete = (req, res) => {
   }
     const id = req.params.id;
 
-    Rank.findByIdAndRemove(id)
+    Task.findByIdAndRemove(id)
       .then(data => {
         if (!data) {
-          res.status(404).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+          res.status(404).send({message: `Impossible de supprimer la tache avec l'ID: ${id}.`});
         } else {
-          res.send({message: "Rang supprimé avec succès!"});
+          res.send({message: "Tache supprimé avec succès!"});
         }
       })
       .catch(err => {
-        res.status(500).send({message: `Impossible de supprimer le rang avec l'ID: ${id}.`});
+        res.status(500).send({message: `Impossible de supprimer la tache avec l'ID: ${id}.`});
       });
   };
 
@@ -149,12 +165,12 @@ exports.deleteAll = (req, res) => {
     res.status(401).send({message: "Non authorisé"})
     return;
   }
-  Rank.deleteMany({})
+  Task.deleteMany({})
       .then(data => {
-        res.send({message: `${data.deletedCount} rang ont été supprimés!`});
+        res.send({message: `${data.deletedCount} taches ont été supprimés!`});
       })
       .catch(err => {
-        res.status(500).send({message: "Erreur durant la suppression des rangs."});
+        res.status(500).send({message: "Erreur durant la suppression des taches."});
       });
   };
 //#endregion DELETE
