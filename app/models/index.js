@@ -12,5 +12,6 @@ db.rank = require("./rank.model.js")(mongoose);
 db.category = require("./category.model.js")(mongoose);
 db.agenda = require("./agenda.model.js")(mongoose);
 db.task = require("./task.model.js")(mongoose);
+db.smallerTask = require("./smallerTask.model.js")(mongoose);
 
 module.exports = db;

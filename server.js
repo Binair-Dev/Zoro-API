@@ -41,6 +41,7 @@ require("./app/routes/rank.routes")(app);
 require("./app/routes/category.routes")(app);
 require("./app/routes/agenda.routes")(app);
 require("./app/routes/task.routes")(app);
+require("./app/routes/smallerTask.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 5400;
