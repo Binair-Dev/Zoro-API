@@ -5,7 +5,8 @@ module.exports = mongoose => {
         Password: String,
         RankId: String,
         isOnline: Boolean,
-        isSoftDeleted: Boolean
+        isSoftDeleted: Boolean,
+        Avatar: String
       },{
         versionKey: false,
         timestamps: true,

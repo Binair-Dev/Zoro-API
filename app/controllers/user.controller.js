@@ -22,7 +22,8 @@ exports.create = async (req, res) => {
           isOnline: data.isOnline,
           isSoftDeleted: data.isSoftDeleted,
           createdAt: data.createdAt,
-          updatedAt: data.updatedAt
+          updatedAt: data.updatedAt,
+          Avatar: data.Avatar
         });
         return tempUser;
       }).catch(err => {
@@ -34,7 +35,8 @@ exports.create = async (req, res) => {
         Password: req.body.Password,
         RankId: req.body.RankId,
         isOnline: req.body.isOnline,
-        isSoftDeleted: req.body.isSoftDeleted
+        isSoftDeleted: req.body.isSoftDeleted,
+        Avatar: data.Avatar
       });
     
       if(dbUser === null) {
@@ -113,7 +115,8 @@ exports.update = (req, res) => {
         } else{
           element.updateOne({
             Email: req.body.Email, 
-            Password: req.body.Password, 
+            Password: req.body.Password,
+            Avatar: req.body.Avatar 
           }).then(data => {
             res.status(200).send(data)
           });
