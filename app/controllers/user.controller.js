@@ -4,6 +4,10 @@ const User = db.user;
 
 //#region CREATE
 exports.create = async (req, res) => {
+  if(req.user.RankId !== "0") {
+      res.status(401).send({message: "Non authorisé"})
+      return;
+    }
     if (!req.body) {
       res.status(400).send({ message: "Aucune données n'ont été rentrée!" });
       return;
@@ -36,7 +40,7 @@ exports.create = async (req, res) => {
         RankId: req.body.RankId,
         isOnline: req.body.isOnline,
         isSoftDeleted: req.body.isSoftDeleted,
-        Avatar: data.Avatar
+        Avatar: req.body.Avatar
       });
     
       if(dbUser === null) {
@@ -97,7 +101,8 @@ exports.create = async (req, res) => {
 
 //#region UPDATE
 exports.update = (req, res) => {
-  if(req.user.Email !== req.body.Email && req.user.RankId !== "0") {
+  const id = req.params.id;
+  if(req.user.Email !== id) {
     res.status(401).send({message: "Non authorisé"})
     return;
   }
@@ -105,7 +110,6 @@ exports.update = (req, res) => {
       return res.status(400).send({message: "Les données entrées sonts vides!"});
     }
   
-    const id = req.params.id;
 
     User.find({Email: id})
       .then(data => {
