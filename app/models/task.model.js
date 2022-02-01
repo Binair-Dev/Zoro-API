@@ -6,6 +6,7 @@ module.exports = mongoose => {
         Description: String,
         AgendaId: String,
         UserId: String,
+        Concerning: []
       },{
         versionKey: false,
         collection: "task",

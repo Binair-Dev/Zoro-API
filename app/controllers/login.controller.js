@@ -30,6 +30,7 @@ exports.login = async (req, res) => {
     })
   
     if(user !== null) {
+     if(!user.isSoftDeleted) {
       if(req.body.Password !== user.Password) {
         res.status(401).send({message: "Nom d'utilisateur ou mot de passe incorrect"})
         return;
@@ -37,6 +38,9 @@ exports.login = async (req, res) => {
       
       const accessToken = auth.generateToken(user);
       res.status(200).send({accessToken});
+     } else {
+      res.status(404).send({message: "Utilisateur inexistant"})
+     }
     }
     else {
       res.status(404)

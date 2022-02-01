@@ -103,27 +103,40 @@ exports.create = async (req, res) => {
 exports.update = (req, res) => {
   const id = req.params.id;
   if(req.user.Email !== id) {
-    res.status(401).send({message: "Non authorisé"})
-    return;
+    if(req.user.RankId !== "0") {
+      res.status(401).send({message: "Non authorisé"})
+      return;
+    }
   }
+
     if (!req.body) {
       return res.status(400).send({message: "Les données entrées sonts vides!"});
     }
   
-
     User.find({Email: id})
       .then(data => {
         data.forEach(element => {
         if (!element) {
           res.status(404).send({message: "Impossible de mettre a jour l'utilisateur avec l'id: " + id + "!"});
         } else{
-          element.updateOne({
-            Email: req.body.Email, 
-            Password: req.body.Password,
-            Avatar: req.body.Avatar 
-          }).then(data => {
-            res.status(200).send(data)
-          });
+          if(req.user.RankId === "0") {
+            element.updateOne({
+              Email: req.body.Email, 
+              Password: req.body.Password,
+              Avatar: req.body.Avatar,
+              RankId: req.body.RankId
+            }).then(data => {
+              res.status(200).send(data)
+            });
+          } else {
+            element.updateOne({
+              Email: req.body.Email, 
+              Password: req.body.Password,
+              Avatar: req.body.Avatar
+            }).then(data => {
+              res.status(200).send(data)
+            });
+          }
         }});
       })
       .catch(err => {
@@ -142,16 +155,23 @@ exports.delete = (req, res) => {
   }
     const id = req.params.id;
 
-    User.findByIdAndRemove(id)
+    User.find({_id: id})
       .then(data => {
-        if (!data) {
-          res.status(404).send({message: `Impossible de supprimer l'utilisateur avec l'ID: ${id}.`});
-        } else {
-          res.send({message: "Utilisateur supprimé avec succès!"});
-        }
+        data.forEach(element => {
+        if (!element) {
+          res.status(404).send({message: "Impossible de supprimer l'utilisateur avec l'id: " + id + "!"});
+        } else{
+          element.updateOne({
+            isSoftDeleted: true, 
+          }).then(data => {
+            res.status(200).send(data)
+          });
+        }});
       })
       .catch(err => {
-        res.status(500).send({message: `Impossible de supprimer l'utilisateur avec l'ID: ${id}.`});
+        res.status(500).send({
+          message: "Erreur lors de la supression de l'utilisateur avec l'id: " + id
+        });
       });
   };
 

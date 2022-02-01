@@ -13,14 +13,13 @@ exports.create = async (req, res) => {
       return;
     }
   
-    if(req.body.Name !== undefined && req.body.CategoryId !== undefined) {
+    if(req.body.Name !== undefined && req.body.Name !== undefined) {
 
       const dbCategory = await Category.findOne({Name: req.body.Name})
       .then(data => {
         tempCategory = new Category({
           _id:  data._id,
           Name: data.Name,
-          CategoryId: data.CategoryId,
         });
         return tempCategory;
       }).catch(err => {
@@ -29,7 +28,6 @@ exports.create = async (req, res) => {
       
       const category = new Category({
         Name: req.body.Name,
-        CategoryId: req.body.CategoryId,
       });
 
       if(dbCategory === null) {
@@ -100,7 +98,7 @@ exports.update = (req, res) => {
   
     const id = req.params.id;
 
-    Category.find({CategoryId: id})
+    Category.find({Name: id})
       .then(data => {
         if(data.length > 0) {
           data.forEach(element => {

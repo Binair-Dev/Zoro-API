@@ -21,6 +21,7 @@ exports.create = async (req, res) => {
         Description: req.body.Description,
         AgendaId: req.body.AgendaId,
         UserId: req.body.UserId,
+        Concerning: req.body.Concerning
       })
       .then(data => {
         tempRank = new Task({
@@ -30,18 +31,20 @@ exports.create = async (req, res) => {
           Description: data.Description,
           AgendaId: data.AgendaId,
           UserId: data.UserId,
+          Concerning: data.Concerning
         });
         return tempRank;
       }).catch(err => {
         return null;
       })
-      
+
       const task = new Task({
         CategoryId: req.body.CategoryId,
         Name: req.body.Name,
         Description: req.body.Description,
         AgendaId: req.body.AgendaId,
         UserId: req.body.UserId,
+        Concerning: req.body.Concerning,
       });
 
       if(dbTask === null) {
@@ -125,6 +128,7 @@ exports.update = (req, res) => {
                 Description: req.body.Description, 
                 AgendaId: req.body.AgendaId, 
                 UserId: req.body.UserId, 
+                Concerning: req.body.Concerning, 
               }).then(data => {
                 res.status(200).send(data)
               });

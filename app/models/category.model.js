@@ -2,7 +2,6 @@ module.exports = mongoose => {
     var schema = mongoose.Schema(
       {
         Name: String,
-        CategoryId: Number,
       },{
         versionKey: false,
         collection: "category",

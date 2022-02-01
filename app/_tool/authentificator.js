@@ -3,7 +3,7 @@ const db = require('../models')
 const User = db.user;
 
 exports.generateToken = (user) => {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1800s'}) //30m
+  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '86400s'}) //24H
 }
 
 exports.authenticateToken = async (req, res, next) => {
