@@ -1,6 +1,7 @@
 require('dotenv').config()
 const db = require("../models");
 const Task = db.task;
+const Agenda = db.agenda;
 
 //#region CREATE
 exports.create = async (req, res) => {
@@ -38,20 +39,36 @@ exports.create = async (req, res) => {
         return null;
       })
 
+      const agenda = new Agenda({
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+      })
+
       const task = new Task({
         CategoryId: req.body.CategoryId,
         Name: req.body.Name,
         Description: req.body.Description,
-        AgendaId: req.body.AgendaId,
         UserId: req.body.UserId,
         Concerning: req.body.Concerning,
       });
 
       if(dbTask === null) {
-        task
-        .save(task)
+        agenda
+        .save(agenda)
         .then(data => {
-          res.send(data);
+            task.AgendaId = data._id;
+            task
+            .save(task)
+            .then(data => {
+              data.AgendaId = data._id;
+              res.send(data);
+            })
+            .catch(err => {
+              res.status(500).send({
+                message:
+                  err.message || "Erreur lors de la création de la tache."
+              });
+            });
         })
         .catch(err => {
           res.status(500).send({
@@ -67,38 +84,65 @@ exports.create = async (req, res) => {
 //#endregion CREATE
 
 //#region READ
-  exports.readAll = (req, res) => {
+  exports.readAll = async (req, res) => {
     if(req.user.RankId !== "0") {
       res.status(401).send({message: "Non authorisé"})
       return;
     }
 
-    Task.find()
+    let taskList = [];
+    await Task.find()
       .then(data => {
-        res.send(data);
+        data.forEach(async(element) => {
+          await Agenda.find({_id: element.AgendaId}).then(data => {
+            element = {
+              _id: element._id,
+              CategoryId: element.CategoryId,
+              Name: element.Name,
+              Description: element.Description,
+              UserId: element.UserId,
+              Concerning: element.Concerning,
+              Agenda: {startDate: data[0].startDate, endDate: data[0].endDate},
+            }
+            taskList.push(element);
+          }).catch(err => {
+            res.status(500).send({message: "Erreur lors de la récupération de la tache."});
+          });
+          res.send(taskList)
+        });
       })
       .catch(err => {
         res.status(500).send({message: "Erreur lors de la récupération de la tache."});
       });
+
   };
 
-  exports.readOne = (req, res) => {
+  exports.readOne = async(req, res) => {
     if(req.user.RankId !== "0") {
       res.status(401).send({message: "Non authorisé"})
       return;
     }
     const id = req.params.id;
   
-    Task.findOne({_id: id})
-      .then(data => {
-        if (!data)
-          res.status(404).send({message: "Impossible de trouver la tache avec l'id suivant: " + id });
-        else res.send(data);
+    await Task.find({_id: id})
+      .then( async (dataTask) => {
+        await Agenda.find({_id: dataTask[0].AgendaId}).then(data => {
+          dataTask[0] = {
+            _id: dataTask[0]._id,
+            CategoryId: dataTask[0].CategoryId,
+            Name: dataTask[0].Name,
+            Description: dataTask[0].Description,
+            UserId: dataTask[0].UserId,
+            Concerning: dataTask[0].Concerning,
+            Agenda: {startDate: data[0].startDate, endDate: data[0].endDate},
+          }
+          res.send(dataTask[0])
+        }).catch(err => {
+          res.status(500).send({message: "Erreur lors de la récupération de la tache."});
+        });
       })
       .catch(err => {
-        res
-          .status(500)
-          .send({ message: "Erreur pendant la récuperation de la tache avec l'id suivant: " + id });
+        res.status(500).send({message: "Erreur lors de la récupération de la tache."});
       });
   };
 //#endregion READ
@@ -144,19 +188,34 @@ exports.update = (req, res) => {
 //#endregion UPDATE
 
 //#region DELETE
-exports.delete = (req, res) => {
+exports.delete = async (req, res) => {
   if(req.user.RankId !== "0") {
     res.status(401).send({message: "Non authorisé"})
     return;
   }
     const id = req.params.id;
+    let agendaId = null;
+    await Task.findOne({_id: id}).then(data => {
+      if(data)
+      agendaId = data.AgendaId;
+    })
 
-    Task.findByIdAndRemove(id)
+    Agenda.findByIdAndRemove(agendaId)
       .then(data => {
         if (!data) {
           res.status(404).send({message: `Impossible de supprimer la tache avec l'ID: ${id}.`});
         } else {
-          res.send({message: "Tache supprimé avec succès!"});
+          Task.findByIdAndRemove(id)
+          .then(data => {
+            if (!data) {
+              res.status(404).send({message: `Impossible de supprimer la tache avec l'ID: ${id}.`});
+            } else {
+              res.send({message: "Tache supprimé avec succès!"});
+            }
+          })
+          .catch(err => {
+            res.status(500).send({message: `Impossible de supprimer la tache avec l'ID: ${id}.`});
+          });
         }
       })
       .catch(err => {

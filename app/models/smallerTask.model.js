@@ -3,6 +3,7 @@ module.exports = mongoose => {
       {
         Description: String,
         TaskId: String,
+        Status: Boolean
       },{
         versionKey: false,
         collection: "smallerTask",

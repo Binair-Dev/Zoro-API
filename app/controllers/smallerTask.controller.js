@@ -20,7 +20,8 @@ exports.create = async (req, res) => {
         tempCategory = new Category({
           _id:  data._id,
           Description: data.Description,
-          TaskId: data.TaskId
+          TaskId: data.TaskId,
+          Status: data.Status
         });
         return tempCategory;
       }).catch(err => {
@@ -29,7 +30,8 @@ exports.create = async (req, res) => {
       
       const smallertask = new smallerTask({
         Description: req.body.Description,
-        TaskId: req.body.TaskId
+        TaskId: req.body.TaskId,
+        Status: req.body.Status
       });
 
       if(dbSmalerTask === null) {
@@ -110,6 +112,7 @@ exports.update = (req, res) => {
               element.updateOne({
                 Description: req.body.Description, 
                 TaskId: req.body.TaskId, 
+                Status: req.body.Status
               }).then(data => {
                 res.status(200).send(data)
               });
